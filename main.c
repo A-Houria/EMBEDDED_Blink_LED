@@ -46,37 +46,56 @@ void main(void)
     P1_DIR |= (1 << 0);    // Set P1.0 as output
     P1_DIR |= (1 << 2);    // Set P1.2 as output
     P1_DIR |= (1 << 5);    // Set P1.5 as output
+    P1_DIR |= (1 << 6);    // Set P1.6 as output
     P1_PEN &= ~(1 << 0);   // Disable pull-up/down resistor for P1.0
     P1_PEN &= ~(1 << 2);   // Disable pull-up/down resistor for P1.2
     P1_PEN &= ~(1 << 5);   // Disable pull-up/down resistor for P1.5
-    P1_OUT &= ~(1 << 0);   // Set P1.0 to low (turn off LED)
-    P1_OUT &= ~(1 << 2);   // Set P1.2 to low (turn off LED)
-    P1_OUT &= ~(1 << 5);   // Set P1.5 to low (turn off LED)
+    P1_PEN &= ~(1 << 6);   // Disable pull-up/down resistor for P1.6
+
 
     // PORT6 CONFIG (LED on P6.6)
     P6_DIR |= (1 << 6);    // Set P6.6 as output
     P6_PEN &= ~(1 << 6);   // Disable pull-up/down resistor for P6.6
-    P6_OUT &= ~(1 << 6);   // Set P6.6 to low (turn off LED)
+
+    // LED CONFIG
+    P1_OUT &= ~(1 << 0);
+    P1_OUT &= ~(1 << 2);
+    P1_OUT &= ~(1 << 5);
+    P1_OUT &= ~(1 << 6);
+    P6_OUT &= ~(1 << 6);
+
+    // counter variable
+    uint8_t current_led = 0;
 
     while(1) {
         // Check if button on P2.3 is pressed (active-low)
-        if (P4_IN & (1 << 1)) {
-            P1_OUT &= ~(1 << 5);   // Turn off LED on P1.5
-            P1_OUT &= ~(1 << 0);   // Turn off LED on P6.6
-        } else {
-            P1_OUT |= (1 << 5);    // Turn on LED on P1.5
-            P1_OUT |= (1 << 0);    // Turn on LED on P6.6
+        if (!(P2_IN & (1 << 3))) {
+            P6_OUT |= (1 << 6);   // (turn on LED) on p6.6
+            current_led = (current_led + 1) % 3;
+            if (current_led == 0) P1_OUT |= (1 << 2);
+            else if (current_led == 1) P1_OUT |= (1 << 5);
+            else if (current_led == 2) P1_OUT |= (1 << 6);
+            __delay_cycles(500000);
+        }else{
+            P1_OUT &= ~(1 << 0);
+            P1_OUT &= ~(1 << 2);
+            P1_OUT &= ~(1 << 5);
+            P1_OUT &= ~(1 << 6);
+            P6_OUT &= ~(1 << 6);
         }
-
         // Check if button on P4.1 is pressed (active-low)
-        if (P2_IN & (1 << 3)) {
-            P6_OUT &= ~(1 << 6);   // Turn off LED on P1.0
-            P1_OUT &= ~(1 << 2);   // Turn off LED on P1.2
-
-        } else {
-            P6_OUT |= (1 << 6);    // Turn on LED on P1.0
-            P1_OUT |= (1 << 2);    // Turn on LED on P1.2
-
+        if (!(P4_IN & (1 << 1))) {
+            P1_OUT |= (1 << 0);   // Turn on LED on P1.0
+            P1_OUT |= (1 << 2);
+            P1_OUT |= (1 << 5);
+            P1_OUT |= (1 << 6);
+            __delay_cycles(500000);
+        }else{
+            P1_OUT &= ~(1 << 0);
+            P1_OUT &= ~(1 << 2);
+            P1_OUT &= ~(1 << 5);
+            P1_OUT &= ~(1 << 6);
+            P6_OUT &= ~(1 << 6);
         }
     }
 }
